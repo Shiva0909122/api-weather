@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="10">
     <title>Real-time Weather App</title>
+    <meta http-equiv="refresh" content="5">
     <style>
-        /* styles.css */
+        
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -18,7 +18,7 @@
         }
 
         #weather-app {
-            background: white;
+            background: linear-gradient(90deg, #FC466B 10%, #3F5EFB 100%);
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -28,6 +28,10 @@
 
         form {
             margin-bottom: 20px;
+        }
+
+        p {
+            color: rgb(233, 229, 221);
         }
 
         input {
@@ -61,11 +65,14 @@
             <p id="temperature"></p>
             <p id="description"></p>
             <p id="humidity"></p>
+            <p id="wind-speed"></p>
+            <p id="air-quality"></p>
+            <p id="current-time"></p>
         </div>
     </div>
     <script>
-        // script.js
-        const apiKey = '05b100a12654fa32ca2956c0d7313b9c'; // Replace with your OpenWeatherMap API key
+        
+        const apiKey = '05b100a12654fa32ca2956c0d7313b9c'; 
 
         document.getElementById('location-form').addEventListener('submit', function (event) {
             event.preventDefault();
@@ -83,6 +90,7 @@
                         return;
                     }
                     displayWeather(data);
+                    getAirQuality(data.coord.lat, data.coord.lon);
                 })
                 .catch(error => console.error('Error fetching weather data:', error));
         }
@@ -93,6 +101,42 @@
             document.getElementById('temperature').textContent = `Temperature: ${data.main.temp}°C`;
             document.getElementById('description').textContent = `Description: ${data.weather[0].description}`;
             document.getElementById('humidity').textContent = `Humidity: ${data.main.humidity}%`;
+            document.getElementById('wind-speed').textContent = `Wind Speed: ${data.wind.speed} m/s`;
+            document.getElementById('current-time').textContent = `Current Time: ${new Date().toLocaleTimeString()}`;
+        }
+
+        function getAirQuality(lat, lon) {
+            fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayAirQuality(data);
+                })
+                .catch(error => console.error('Error fetching air quality data:', error));
+        }
+
+        function displayAirQuality(data) {
+            const aqi = data.list[0].main.aqi;
+            let aqiText;
+            switch (aqi) {
+                case 1:
+                    aqiText = 'Good';
+                    break;
+                case 2:
+                    aqiText = 'Fair';
+                    break;
+                case 3:
+                    aqiText = 'Moderate';
+                    break;
+                case 4:
+                    aqiText = 'Poor';
+                    break;
+                case 5:
+                    aqiText = 'Very Poor';
+                    break;
+                default:
+                    aqiText = 'Unknown';
+            }
+            document.getElementById('air-quality').textContent = `Air Quality: ${aqiText}`;
         }
     </script>
 </body>
